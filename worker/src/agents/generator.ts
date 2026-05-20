@@ -10,11 +10,27 @@ const MIN_LENGTH = 20;
 const MAX_LENGTH = 280;
 
 function validateContent(raw: string): string | null {
-  const cleaned = raw
+  let cleaned = raw
     .trim()
-    .replace(/^["'`]+|["'`]+$/g, '')  // strip surrounding quotes
-    .replace(/\n+/g, ' ')             // collapse newlines
+    .replace(/^["'`*#]+|["'`*#]+$/g, '')   // strip quotes/markdown artifacts
+    .replace(/\n+/g, ' ')                   // collapse newlines
+    .replace(/\s{2,}/g, ' ')               // collapse multiple spaces
     .trim();
+
+  if (cleaned.length < MIN_LENGTH) return null;
+
+  // Truncate to last complete sentence within MAX_LENGTH
+  if (cleaned.length > MAX_LENGTH) {
+    const window = cleaned.slice(0, MAX_LENGTH);
+    const lastSentence = window.search(/[.!?][^.!?]*$/);
+    if (lastSentence > MIN_LENGTH) {
+      cleaned = cleaned.slice(0, lastSentence + 1).trim();
+    } else {
+      // No sentence boundary — hard truncate at word boundary
+      cleaned = window.replace(/\s+\S*$/, '').trim();
+    }
+  }
+
   if (cleaned.length < MIN_LENGTH || cleaned.length > MAX_LENGTH) return null;
   return cleaned;
 }
