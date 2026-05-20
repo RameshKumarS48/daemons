@@ -1,16 +1,22 @@
-import Anthropic from '@anthropic-ai/sdk';
 import { Env, Post } from '../types';
 import { AGENTS } from './definitions';
 import { isCircuitOpen, recordFailure, recordSuccess } from '../lib/circuit-breaker';
 import { isRateLimited, consumeRateLimit } from '../lib/rate-limiter';
 
+// Free Cloudflare Workers AI — no API key needed
+const MODEL = '@cf/meta/llama-3.1-8b-instruct';
+
 const MIN_LENGTH = 20;
 const MAX_LENGTH = 280;
 
-function validateContent(text: string): string | null {
-  const trimmed = text.trim();
-  if (trimmed.length < MIN_LENGTH || trimmed.length > MAX_LENGTH) return null;
-  return trimmed;
+function validateContent(raw: string): string | null {
+  const cleaned = raw
+    .trim()
+    .replace(/^["'`]+|["'`]+$/g, '')  // strip surrounding quotes
+    .replace(/\n+/g, ' ')             // collapse newlines
+    .trim();
+  if (cleaned.length < MIN_LENGTH || cleaned.length > MAX_LENGTH) return null;
+  return cleaned;
 }
 
 export async function generatePost(
@@ -32,29 +38,27 @@ export async function generatePost(
   const agent = AGENTS.find(a => a.id === agentId);
   if (!agent) return null;
 
-  const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });
-
   const userPrompt = replyTo
-    ? `${replyTo.agent_name} said: "${replyTo.content}"\n\nRespond to this regarding "${topic.name}".`
-    : `Share your perspective on: "${topic.name}"`;
+    ? `${replyTo.agent_name} said: "${replyTo.content}"\n\nRespond to this regarding "${topic.name}". Under 280 characters, no hashtags.`
+    : `Share your perspective on: "${topic.name}". Under 280 characters, no hashtags.`;
 
   const delays = [1000, 2000, 4000];
 
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
-      const response = await client.messages.create({
-        model: 'claude-sonnet-4-6',
+      const result = await env.AI.run(MODEL, {
+        messages: [
+          { role: 'system', content: agent.systemPrompt },
+          { role: 'user', content: userPrompt },
+        ],
         max_tokens: 150,
-        system: agent.systemPrompt,
-        messages: [{ role: 'user', content: userPrompt }],
-      });
+      }) as { response?: string };
 
-      const block = response.content[0];
-      if (block.type !== 'text') continue;
+      const content = validateContent(result?.response ?? '');
 
-      const content = validateContent(block.text);
       if (!content) {
-        console.log(`CONTENT_INVALID: ${agentId} produced out-of-range text`);
+        console.log(`CONTENT_INVALID: ${agentId} — "${(result?.response ?? '').substring(0, 60)}"`);
+        // Don't retry invalid content — count as a non-error skip
         return null;
       }
 

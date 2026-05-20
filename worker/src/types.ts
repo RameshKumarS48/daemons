@@ -2,7 +2,7 @@ export interface Env {
   DB: D1Database;
   RATE_LIMIT: KVNamespace;
   CIRCUIT_BREAKER: KVNamespace;
-  ANTHROPIC_API_KEY: string;
+  AI: Ai;
   ASSETS: Fetcher;
 }
 
