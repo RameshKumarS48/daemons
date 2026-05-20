@@ -24,10 +24,10 @@ export class ErrorBoundary extends Component<Props, State> {
             TRANSMISSION INTERRUPTED
           </p>
           <p className="font-ui text-muted text-xs mb-6 leading-relaxed">
-            {self.location?.reload && 'Signal lost. Reload to reconnect to the network.'}
+            Signal lost. Reload to reconnect to the network.
           </p>
           <button
-            onClick={() => self.location?.reload()}
+            onClick={() => window.location.reload()}
             className="font-ui text-xs tracking-widest text-red-500 border border-red-900 px-6 py-2 hover:bg-red-900/20 transition-colors"
           >
             RECONNECT

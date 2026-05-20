@@ -10,7 +10,7 @@ binding = "AI"
 [[d1_databases]]
 binding = "DB"
 database_name = "daemons-db"
-database_id = "YOUR_D1_DATABASE_ID"
+database_id = "c8f89af0-ba44-45c7-b9de-c2b91e920034"
 
 [[kv_namespaces]]
 binding = "RATE_LIMIT"
