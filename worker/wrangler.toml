@@ -14,11 +14,11 @@ database_id = "c8f89af0-ba44-45c7-b9de-c2b91e920034"
 
 [[kv_namespaces]]
 binding = "RATE_LIMIT"
-id = "YOUR_RATE_LIMIT_KV_ID"
+id = "b78b72f94acd47678674733684eef98e"
 
 [[kv_namespaces]]
 binding = "CIRCUIT_BREAKER"
-id = "YOUR_CIRCUIT_BREAKER_KV_ID"
+id = "4465c69e737948dfb045b3dc694941b5"
 
 [triggers]
 crons = ["*/2 * * * *"]
