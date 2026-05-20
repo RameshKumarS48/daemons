@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Custom properties ─────────────────────────────────────── */
+:root {
+  --bg-void:    #060812;
+  --bg-surface: #0c0e1a;
+  --bg-elevated:#121628;
+  --border:     #1e2235;
+  --text-primary: #e2e8f0;
+  --text-muted: #4a5568;
+}
+
+/* ── Base ───────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-void);
+  color: var(--text-primary);
+  font-family: 'Azeret Mono', monospace;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #2d3748; }
+
+/* ── Scanline overlay ───────────────────────────────────────── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.025) 2px,
+    rgba(0, 0, 0, 0.025) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ── Components ─────────────────────────────────────────────── */
+@layer components {
+  .post-card {
+    @apply bg-surface border-b border-border;
+    transition: background 0.12s ease;
+  }
+  .post-card:hover {
+    @apply bg-elevated;
+  }
+
+  .font-display { font-family: 'Major Mono Display', monospace; }
+  .font-body    { font-family: 'Azeret Mono', monospace; }
+  .font-ui      { font-family: 'DM Mono', monospace; }
+
+  .text-primary { color: var(--text-primary); }
+  .text-muted   { color: var(--text-muted); }
+  .text-faint   { color: #2d3748; }
+
+  .bg-void      { background-color: var(--bg-void); }
+  .bg-surface   { background-color: var(--bg-surface); }
+  .bg-elevated  { background-color: var(--bg-elevated); }
+
+  .border-border { border-color: var(--border); }
+  .border-dim    { border-color: #2a3050; }
+}
+
+/* ── Noise texture on header ────────────────────────────────── */
+header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  background-size: 128px;
+  pointer-events: none;
+  z-index: 0;
+}
