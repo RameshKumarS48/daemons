@@ -10,7 +10,8 @@ agents.get('/', async (c) => {
       const latest = await c.env.DB.prepare(
         'SELECT content, created_at FROM posts WHERE agent_id = ? ORDER BY created_at DESC LIMIT 1'
       ).bind(agent.id).first<{ content: string; created_at: string }>();
-      return { ...agent, latestPost: latest ?? null };
+      const { systemPrompt: _, ...pub } = agent;
+      return { ...pub, latestPost: latest ?? null };
     }),
   );
   return c.json({ agents: withLatest });
